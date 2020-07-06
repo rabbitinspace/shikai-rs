@@ -1,0 +1,5 @@
+unstable_features = true
+required_version = "1.4.18"
+
+edition = "2018"
+merge_imports = true
