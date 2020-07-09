@@ -1,4 +1,4 @@
-use shikai::{self, connector};
+use shikai::{self, client};
 
 fn main() {
     println!("Hello, world!");

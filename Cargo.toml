@@ -8,5 +8,6 @@ edition = "2018"
 futures = "0.3.5"
 tokio = { version = "0.2.21", default-features = false, features = ["io-util", "dns", "tcp", "stream", "time"] }
 async-native-tls = { version = "0.3.3", default-features = false, features = [ "runtime-tokio" ] }
+async-trait = "0.1.36"
 url = "2.1.1"
 mime = "0.3.16"

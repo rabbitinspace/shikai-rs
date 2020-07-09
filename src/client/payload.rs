@@ -1,7 +1,10 @@
-use crate::url::Url;
-use crate::mime::Mime;
+use std::convert::TryFrom;
+use std::str::FromStr;
 
-#[derive(Debug, Clone, Copy)]
+use crate::mime::Mime;
+use crate::url::Url;
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Status {
     Input = 10,
     SensitiveInput = 11,
@@ -28,7 +31,7 @@ pub enum Status {
     CertificateNotValid = 62,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum StatusType {
     Input = 1,
     Success,
@@ -50,26 +53,82 @@ pub struct Request {
 
 pub struct Response {
     pub header: Header,
-    pub mime: Mime,
+    pub mime: Option<Mime>,
     pub body: Vec<u8>,
+    _priv: (),
 }
 
 impl Status {
     pub fn status_type(&self) -> StatusType {
+        let value = (*self as i32) / 10;
+        StatusType::try_from(value)
+            .expect("unexpected status code type")
+    }
+}
+
+impl TryFrom<i32> for Status {
+    type Error = ();
+
+    fn try_from(value: i32) -> Result<Self, Self::Error> {
+        use Status::*;
+
+        // TODO: write macro
+        let cases = [
+            Input,
+            SensitiveInput,
+            Success,
+            RedirectTemporary,
+            RedirectPermanent,
+            TemporaryFailure,
+            ServerUnavailable,
+            CgiError,
+            ProxyError,
+            SlowDown,
+            PermanentFailure,
+            NotFound,
+            Gone,
+            ProxyRequestRefused,
+            BadRequest,
+            ClientCertificateRequired,
+            CertificateNotAuthorised,
+            CertificateNotValid,
+        ];
+
+        for case in cases.iter() {
+            if (*case as i32) == value {
+                return Ok(*case);
+            }
+        }
+        
+        Err(())
+    }
+}
+
+impl TryFrom<i32> for StatusType {
+    type Error = ();
+
+    fn try_from(value: i32) -> Result<Self, Self::Error> {
         use StatusType::*;
 
-        // TODO: macro
-        let value = (*self as i32) / 10;
-        match value {
-            value if value == Input as i32 => Input,
-            value if value == Success as i32 => Success,
-            value if value == Redirect as i32 => Redirect,
-            value if value == TemporaryFailure as i32 => TemporaryFailure,
-            value if value == PermanentFailure as i32 => PermanentFailure,
-            value if value == CertificateRequired as i32 => CertificateRequired,
-            _ => panic!("unexpected status code type"),
+        // TODO: write macro
+        let cases = [
+            Input,
+            Success,
+            Redirect,
+            TemporaryFailure,
+            PermanentFailure,
+            CertificateRequired,
+        ];
+
+        for case in cases.iter() {
+            if (*case as i32) == value {
+                return Ok(*case);
+            }
         }
+
+        Err(())
     }
+    
 }
 
 impl Request {
@@ -84,5 +143,16 @@ impl Request {
         }
 
         Self { url, _priv: () }
+    }
+}
+
+impl Response {
+    pub fn new(header: Header, body: Vec<u8>) -> Result<Self, mime::FromStrError> {
+        let mut mime = None;
+        if header.status.status_type() == StatusType::Success {
+            mime = Some(Mime::from_str(&header.meta)?);
+        }
+
+        Ok(Response { header, mime, body, _priv: () })
     }
 }
