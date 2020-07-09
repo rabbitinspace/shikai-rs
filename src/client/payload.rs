@@ -76,6 +76,7 @@ impl Request {
     pub fn new(mut url: Url) -> Self {
         assert_eq!(url.scheme(), "gemini", "only gemini scheme is suported");
         assert!(url.has_host(), "url must have a host");
+        assert!(!url.host_str().unwrap().is_empty(), "url must have a host");
 
         if matches!(url.port(), None) {
             url.set_port(Some(1965))
