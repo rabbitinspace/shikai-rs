@@ -13,6 +13,12 @@ pub enum Error {
     Tls(TlsError),
 }
 
+pub(crate) struct Config {
+    connection_timeout: Option<Duration>,
+    keepalive_timeout: Option<Duration>,
+    nodelay: Option<bool>,
+}
+
 pub(crate) struct GeminiConnector<'u> {
     config: Config,
     url: &'u Url,
@@ -50,12 +56,6 @@ impl<'u> GeminiConnector<'u> {
 
         Ok(tls_stream)
     }
-}
-
-pub(crate) struct Config {
-    connection_timeout: Option<Duration>,
-    keepalive_timeout: Option<Duration>,
-    nodelay: Option<bool>,
 }
 
 impl From<tokio::io::Error> for Error {
