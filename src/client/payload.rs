@@ -1,6 +1,8 @@
 use std::convert::TryFrom;
 use std::str::FromStr;
 
+use bytes::Bytes;
+
 use crate::mime::Mime;
 use crate::url::Url;
 
@@ -54,7 +56,7 @@ pub struct Request {
 pub struct Response {
     pub header: Header,
     pub mime: Option<Mime>,
-    pub body: Vec<u8>,
+    pub body: Bytes,
     _priv: (),
 }
 
@@ -147,7 +149,7 @@ impl Request {
 }
 
 impl Response {
-    pub fn new(header: Header, body: Vec<u8>) -> Result<Self, mime::FromStrError> {
+    pub fn new(header: Header, body: Bytes) -> Result<Self, mime::FromStrError> {
         let mut mime = None;
         if header.status.status_type() == StatusType::Success {
             mime = Some(Mime::from_str(&header.meta)?);

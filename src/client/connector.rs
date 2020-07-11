@@ -1,5 +1,5 @@
 use async_native_tls::{TlsConnector, TlsStream};
-use futures::prelude::*;
+use futures_util::TryFutureExt;
 use std::time::Duration;
 use tokio::net::TcpStream;
 use url::Url;
