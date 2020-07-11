@@ -1,5 +1,5 @@
-use bytes::Bytes;
 use bstr::ByteSlice;
+use bytes::Bytes;
 
 pub enum Block {
     Empty,
@@ -51,11 +51,17 @@ impl ContentBlock<'_> for TextBlock {
 impl From<&mut Bytes> for TextBlock {
     fn from(buf: &mut Bytes) -> Self {
         let line_len = match buf.lines().next() {
-            None => return Self { content: Bytes::new() },
+            None => {
+                return Self {
+                    content: Bytes::new(),
+                }
+            }
             Some(line) => line.len(),
         };
 
-        Self { content: buf.split_to(line_len) }
+        Self {
+            content: buf.split_to(line_len),
+        }
     }
 }
 
@@ -69,7 +75,12 @@ impl From<&mut Bytes> for LinkBlock {
     fn from(buf: &mut Bytes) -> Self {
         let line = match buf[..2].lines().next() {
             Some(line) => line,
-            None => return LinkBlock { url: Bytes::new(), name: None }
+            None => {
+                return LinkBlock {
+                    url: Bytes::new(),
+                    name: None,
+                }
+            }
         };
 
         let line_len = line.len();
@@ -88,6 +99,6 @@ impl From<&mut Bytes> for LinkBlock {
             None
         };
 
-        Self { url, name } 
+        Self { url, name }
     }
 }

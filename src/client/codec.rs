@@ -1,13 +1,9 @@
 pub mod gemtext;
 pub mod response;
 
-use std::convert::TryFrom;
-
 use async_trait::async_trait;
 use bstr::{ByteSlice, CharIndices};
-use tokio::io::{AsyncRead, AsyncReadExt};
-
-use crate::client::payload::{Header, Response, Status};
+use tokio::io::AsyncRead;
 
 #[async_trait]
 pub trait Decoder {

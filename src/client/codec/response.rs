@@ -1,14 +1,16 @@
 use std::convert::TryFrom;
 
 use async_trait::async_trait;
-use tokio::io::{AsyncRead, AsyncReadExt};
 use bstr::ByteSlice;
 use bytes::Bytes;
+use mime;
+use tokio::io::{AsyncRead, AsyncReadExt};
 
-use crate::client::codec::Decoder;
-use crate::client::payload::{Response, Status, Header};
-use crate::client::connector;
-use crate::mime;
+use crate::client::{
+    codec::Decoder,
+    connector,
+    payload::{Header, Response, Status},
+};
 
 pub enum ResponseDecoderError {
     Socket(connector::SocketError),
@@ -24,7 +26,10 @@ impl Decoder for ResponseDecoder {
     type Output = Response;
     type Error = ResponseDecoderError;
 
-    async fn decode<R: AsyncRead + Unpin + Send>(&mut self, source: &mut R) -> Result<Self::Output, Self::Error> {
+    async fn decode<R: AsyncRead + Unpin + Send>(
+        &mut self,
+        source: &mut R,
+    ) -> Result<Self::Output, Self::Error> {
         let mut buf = Vec::with_capacity(64);
         source.read_to_end(&mut buf).await?;
 
@@ -72,7 +77,8 @@ impl ResponseDecoder {
             None => Err(ResponseDecoderError::BadMeta(Bytes::new())),
             Some(end) => {
                 let buf = buf.split_to(end);
-                String::from_utf8(buf[..buf.len() - 2].to_vec()).map_err(|_| ResponseDecoderError::BadMeta(buf))
+                String::from_utf8(buf[..buf.len() - 2].to_vec())
+                    .map_err(|_| ResponseDecoderError::BadMeta(buf))
             }
         }
     }

@@ -1,10 +1,8 @@
-use std::convert::TryFrom;
-use std::str::FromStr;
+use std::{convert::TryFrom, str::FromStr};
 
 use bytes::Bytes;
-
-use crate::mime::Mime;
-use crate::url::Url;
+use mime::Mime;
+use url::Url;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Status {
@@ -63,8 +61,7 @@ pub struct Response {
 impl Status {
     pub fn status_type(&self) -> StatusType {
         let value = (*self as i32) / 10;
-        StatusType::try_from(value)
-            .expect("unexpected status code type")
+        StatusType::try_from(value).expect("unexpected status code type")
     }
 }
 
@@ -101,7 +98,7 @@ impl TryFrom<i32> for Status {
                 return Ok(*case);
             }
         }
-        
+
         Err(())
     }
 }
@@ -130,7 +127,6 @@ impl TryFrom<i32> for StatusType {
 
         Err(())
     }
-    
 }
 
 impl Request {
@@ -155,6 +151,11 @@ impl Response {
             mime = Some(Mime::from_str(&header.meta)?);
         }
 
-        Ok(Response { header, mime, body, _priv: () })
+        Ok(Response {
+            header,
+            mime,
+            body,
+            _priv: (),
+        })
     }
 }
