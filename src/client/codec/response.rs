@@ -3,7 +3,6 @@ use std::convert::TryFrom;
 use async_trait::async_trait;
 use bstr::ByteSlice;
 use bytes::Bytes;
-use mime;
 use tokio::io::{AsyncRead, AsyncReadExt};
 
 use crate::client::{
